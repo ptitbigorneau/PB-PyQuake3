@@ -1,5 +1,5 @@
-# PB-PyQuake3
-**PyQuake3** Python module that can query and execute rcon commands on a Quake 3 server.
+# PB-PyQuake3 - pyquake3 for Python 3
+**PyQuake3** Python 3 module that can query and execute rcon commands on a Quake 3 server.
 
 - [Gerald Kaszuba](http://geraldkaszuba.com/)
 - [gak](https://github.com/gak) - [pyquake3](https://github.com/gak/pyquake3)

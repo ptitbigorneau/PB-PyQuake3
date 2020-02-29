@@ -1,5 +1,5 @@
 """
-Python 3 Quake 3 Library
+Python 2 Quake 3 Library
 
 http://misc.slowchop.com/misc/wiki/pyquake3
 Copyright (C) 2006-2007 Gerald Kaszuba
@@ -23,6 +23,7 @@ urthub - https://github.com/urthub/pyquake3
 """
 import socket
 import re
+
 ###########################################################################################################################
 # Class Player
 ###########################################################################################################################
@@ -53,7 +54,7 @@ class PyQuake3(object):
     """
     PyQuake3 class
     """
-    packet_prefix = bytes([0xff] * 4)
+    packet_prefix = '\xff' * 4
     player_reo = re.compile(r'^(\d+) (\d+) "(.*)"')
 
     rcon_password = None
@@ -97,7 +98,7 @@ class PyQuake3(object):
         """
         send packet
         """
-        self.sock.send(self.packet_prefix + data.encode() + b"\n")
+        self.sock.send('%s%s\n' % (self.packet_prefix, data))
 
     def recv(self, timeout=1):
         """
@@ -106,7 +107,7 @@ class PyQuake3(object):
         self.sock.settimeout(timeout)
         try:
             return self.sock.recv(8192)
-        except socket.error as err:
+        except socket.error, err:
             raise Exception('Error receiving the packet: %s' % err[1])
 
     def command(self, cmd, timeout=1, retries=5):
@@ -120,8 +121,7 @@ class PyQuake3(object):
             except Exception:
                 data = None
             if data:
-                data = data.replace(b"\xff",b"")
-                return self.parse_packet(data.decode())
+                return self.parse_packet(data)
             retries -= 1
         raise Exception('Server response timed out')
 
@@ -138,6 +138,8 @@ class PyQuake3(object):
         """
         parse the received packet
         """
+        if data.find(self.packet_prefix) != 0:
+            raise Exception('Malformed packet')
 
         first_line_length = data.find('\n')
         if first_line_length == -1:
@@ -173,7 +175,7 @@ class PyQuake3(object):
                 continue
             match = self.player_reo.match(player)
             if not match:
-                print("couldnt match %s")%player
+                print 'couldnt match', player
                 continue
             frags, ping, name = match.groups()
             self.players.append(Player(1, name, frags, ping))
@@ -213,14 +215,14 @@ if __name__ == '__main__':
 
     QUAKE.update()
 
-    print("The server name of '%s' is %s, running map %s with %s player(s)." % (QUAKE.get_address(), QUAKE.values['sv_hostname'], QUAKE.values['mapname'], len(QUAKE.players)))
+    print "The server name of '%s' is %s, running map %s with %s player(s)." % (QUAKE.get_address(), QUAKE.values['sv_hostname'], QUAKE.values['mapname'], len(QUAKE.players))
 
     for gamer in QUAKE.players:
-        print("%s with %s frags and a %s ms ping" % (gamer.name, gamer.frags, gamer.ping))
+        print "%s with %s frags and a %s ms ping" % (gamer.name, gamer.frags, gamer.ping)
 
     QUAKE.rcon_update()
 
     for gamer in QUAKE.players:
-        print("%s (%s) has IP address of %s" % (gamer.name, gamer.num, gamer.address))
+        print "%s (%s) has IP address of %s" % (gamer.name, gamer.num, gamer.address)
 
     QUAKE.rcon('bigtext "pyquake3 is great"')
